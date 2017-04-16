@@ -9,6 +9,7 @@ object Main extends App {
 
   override def main(args: Array[String]): Unit = {
     val logger = Logger.getLogger(Main.getClass.getName)
+    val config: Config = ConfigFactory.load()
     DBs.setupAll()
 
     val repository = new Repository
@@ -16,8 +17,6 @@ object Main extends App {
       case x if x.get > 0 => repository.clearTable()
       case Some(0) => logger.info("Table 'TEST' already clear.")
     }
-
-    val config: Config = ConfigFactory.load()
     repository.insertRowsIntoTable(config.getInt("recordsnumber"))
     val rows = repository.getAllRowsFromTable
 

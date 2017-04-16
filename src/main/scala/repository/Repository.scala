@@ -4,8 +4,6 @@ import java.util.logging.Logger
 
 import scalikejdbc.{DB, _}
 
-import scala.collection.mutable
-
 class Repository {
 
   val logger: Logger = Logger.getLogger(classOf[Repository].getName)
@@ -27,9 +25,9 @@ class Repository {
     logger.info(s"Inserted $numberOfRecords rows into table 'TEST'.")
   }
 
-  def getAllRowsFromTable: mutable.Buffer[Int] = DB.readOnly { implicit session =>
+  def getAllRowsFromTable: List[Int] = DB.readOnly { implicit session =>
     val result = sql"SELECT * FROM test".map(_.int(1)).list().apply()
     logger.info(s"Selected ${result.size} rows from table 'TEST'.")
-    result.toBuffer
+    result
   }
 }

@@ -13,14 +13,7 @@ object Helper {
 
   val logger: Logger = Logger.getLogger(Helper.getClass.getName)
 
-  def readProperties: Properties = {
-    val properties = new Properties()
-    properties.load(new FileInputStream("src/main/resources/application.properties"))
-    logger.info("Readed properties from source file.")
-    properties
-  }
-
-  def createXml(rows: mutable.Buffer[Int], filePath: String): Unit = {
+  def createXml(rows: List[Int], filePath: String): Unit = {
     val nodeBuffer: NodeBuffer = new NodeBuffer
     rows.foreach(r => {
       nodeBuffer += <entry><field>{r.toString}</field></entry>
@@ -40,7 +33,6 @@ object Helper {
   def parseXml(filePath: String): Int = {
     val xml = XML.loadFile(filePath)
     val entries = xml \ "entry"
-    val result = entries.map(e => (e \ "@field").text.toInt).sum
-    result
+    entries.map(e => (e \ "@field").text.toInt).sum
   }
 }
