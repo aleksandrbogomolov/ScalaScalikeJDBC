@@ -1,46 +1,32 @@
-import java.sql.DriverManager
-import java.util.Properties
 import java.util.logging.Logger
 
-import configuration.DataBaseConfiguration
+import com.typesafe.config.{Config, ConfigFactory}
 import helper.Helper
 import repository.Repository
+import scalikejdbc.config.DBs
 
-object Main {
+object Main extends App {
 
-  val properties: Properties = Helper.readProperties
+  override def main(args: Array[String]): Unit = {
+    val logger = Logger.getLogger(Main.getClass.getName)
+    DBs.setupAll()
 
-  def main(args: Array[String]): Unit = {
-    val configuration = initDataBaseConfiguration()
-    val repository = new Repository(configuration.connection)
+    val repository = new Repository
     repository.getTableRowCount match {
-      case x if x > 0 => repository.clearTable()
+      case x if x.get > 0 => repository.clearTable()
+      case Some(0) => logger.info("Table 'TEST' already clear.")
     }
-    repository.insertRowsIntoTable(configuration.numberOfRecords)
-    val rows = repository.getAllRowsFromTable
-    repository.closeConnection()
 
-    val firstXmlPath = properties.getProperty("firstxmlpath")
-    val secondXmlPath = properties.getProperty("secondxmlpath")
-    val stylesheetpath = properties.getProperty("stylesheetpath")
+    val config: Config = ConfigFactory.load()
+    repository.insertRowsIntoTable(config.getInt("recordsnumber"))
+    val rows = repository.getAllRowsFromTable
+
+    val firstXmlPath = config.getString("firstxmlpath")
+    val secondXmlPath = config.getString("secondxmlpath")
+    val stylesheetpath = config.getString("stylesheetpath")
 
     Helper.createXml(rows, firstXmlPath)
     Helper.transformXml(stylesheetpath, firstXmlPath, secondXmlPath)
-    Logger.getLogger(Main.getClass.getName).info(s"Result = ${Helper.parseXml(secondXmlPath)}.")
-  }
-
-  def initDataBaseConfiguration(): DataBaseConfiguration = {
-    val cnfg = new DataBaseConfiguration()
-    cnfg.dataBaseUrl = properties.getProperty("url")
-    cnfg.dataBaseName = properties.getProperty("database")
-    cnfg.userName = properties.getProperty("user")
-    cnfg.password = properties.getProperty("password")
-    cnfg.driver = properties.getProperty("driver")
-    cnfg.numberOfRecords = properties.getProperty("recordsnumber").toInt
-
-    Class.forName(properties.getProperty("driver"))
-    cnfg.connection = DriverManager.getConnection(cnfg.dataBaseUrl + cnfg.dataBaseName, cnfg
-      .userName, cnfg.password)
-    cnfg
+    logger.info(s"Result = ${Helper.parseXml(secondXmlPath)}.")
   }
 }
