@@ -1,12 +1,9 @@
 package helper
 
-import java.io.FileInputStream
-import java.util.Properties
 import java.util.logging.Logger
-import javax.xml.transform.{OutputKeys, TransformerFactory}
 import javax.xml.transform.stream.{StreamResult, StreamSource}
+import javax.xml.transform.{OutputKeys, TransformerFactory}
 
-import scala.collection.mutable
 import scala.xml._
 
 object Helper {
